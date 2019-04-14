@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://Main.gd" type="Script" id=1]
 [ext_resource path="res://Stage.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Player.tscn" type="PackedScene" id=3]
 [ext_resource path="res://InputTerminal.tscn" type="PackedScene" id=4]
-[ext_resource path="res://Wall.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Button.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Item.tscn" type="PackedScene" id=6]
 
 [node name="Main" type="Node2D"]
 script = ExtResource( 1 )
@@ -21,8 +22,12 @@ margin_top = 399.0
 margin_right = 1026.0
 margin_bottom = 599.0
 
-[node name="Wall" parent="." instance=ExtResource( 5 )]
-position = Vector2( 472.203, 193.852 )
-collision_mask = 7
+[node name="Button" parent="." instance=ExtResource( 5 )]
+position = Vector2( 352.395, 93.6957 )
 
+[node name="Item" parent="." instance=ExtResource( 6 )]
+position = Vector2( 463.215, 318.685 )
+
+[connection signal="take" from="Player" to="Item" method="_on_Player_take"]
+[connection signal="use" from="Player" to="Button" method="_on_Player_use"]
 [connection signal="handle_input" from="InputTerminal" to="." method="_handle_input"]
