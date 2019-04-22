@@ -17,7 +17,7 @@ _global_script_classes=[ {
 "base": "Node",
 "class": "UserAction",
 "language": "GDScript",
-"path": "res://new_script.gd"
+"path": "res://UserAction.gd"
 } ]
 _global_script_class_icons={
 "Action": "",

@@ -21,11 +21,9 @@ func _ready():
 	_actions.append("bind")
 
 func _physics_process(delta):
-	if Input.is_action_pressed("ui_up"):
-		velocity.x += 0
-		velocity.y += -1
-		var normalised = velocity.normalized() * speed * delta
-		self.move_and_collide(normalised)
+		if velocity.length() > 0:
+			var normalised = velocity.normalized() * speed * delta
+			self.move_and_collide(normalised)
 
 func _on_Area2D_area_entered(area):
 	canInteract = true
@@ -38,13 +36,8 @@ func _print(text):
 	$Panel/Label.text = text[0]
 
 func _move(vector):
-	var ev = InputEvent.new()
-	var code = OS.find_scancode_from_string("ui_up")
-	ev.scancode = code
-	get_tree().input_event(ev)
-
-func reset():
-	velocity = Vector2(0,0)
+	velocity.x = float(vector[0])
+	velocity.y = float(vector[1]) * -1
 
 func _use(arg):
 	if canInteract:
