@@ -32,13 +32,16 @@ func _ready():
 	boundActions["t"] = "player.use()"
 
 func _physics_process(delta):
-	velocity = Vector2()
-	print(handleBoundActions)
+	resetState()
 	if handleBoundActions:
 		handleInputs()
 	if velocity.length() > 0:
 		var normalised = velocity.normalized() * speed * delta
 		self.move_and_collide(normalised)
+
+func resetState():
+	velocity = Vector2()
+	checkedActions = []
 
 func _on_Area2D_area_entered(area):
 	canInteract = true
@@ -55,6 +58,7 @@ func _print(args: ActionArguments):
 func _move(args: ActionArguments):
 	velocity.x += float(args.arguments[0])
 	velocity.y += float(args.arguments[1]) * -1
+	handleDelegate("didMove", args.pressed)
 
 func _use(args: ActionArguments):
 	if (skipAction("use")):
@@ -88,20 +92,23 @@ func _bind(args: ActionArguments):
 		$Panel.show()
 		$Panel/Label.text = "Could not bind to " + binding
 
-func handle_input_text(text: String, pressed = null):
+func handle_input_text(text: String, pressed = false):
 	var isAction = text.find(_name) == 0
 	var isFunc = text.find("func") == 0
 	if isAction:
-		handleAction(text, pressed)
+		handlePlayerAction(text, pressed)
 	elif isFunc:
 		handleFunc(text)
 
-func handleAction(action: String, pressed):
+func handlePlayerAction(action: String, pressed):
 	var text = action.split(".", false, 1)
 	if text.size() == 1:
 		emit_signal("terminalMessage", "Invalid declaration")
 		return
-	var parts = text[1].split("(", true, 1)
+	handleAction(text[1], pressed)
+
+func handleAction(action: String, pressed):
+	var parts = action.split("(", true, 1)
 	if parts.size() == 2:
 		var actionName = parts[0]
 		var args = parts[1].trim_suffix(")")
@@ -118,21 +125,23 @@ func handleAction(action: String, pressed):
 		elif userActions.has(actionName):
 			var act = userActions[actionName]
 			for funcLine in act.funcLines:
-				handleAction(funcLine, pressed)
+				handlePlayerAction(funcLine, pressed)
 		else:
 			emit_signal("terminalMessage", _name + " can't do that")
 	else:
 		emit_signal("terminalMessage", "Invalid declaration")
 
+func handleDelegate(action: String, pressed):
+	if userActions.has(action):
+		handleAction(action + "()", pressed)
+
 func updateActionstate(actionName: String, pressed):
-	print(String(checkedActions))
 	if(checkedActions.has(actionName)):
 		return
 	pressedActions[actionName] = pressed
 	checkedActions.append(actionName)
 
 func handleInputs():
-	checkedActions = []
 	for validInput in validInputs:
 		if Input.is_action_pressed(validInput):
 			handleBoundAction(validInput.to_lower(), true)
@@ -145,7 +154,7 @@ func handleBoundAction(code: String, pressed: bool):
 		handle_input_text(boundActions[code], pressed)
 
 func skipAction(action: String):
-		return actionIsPressed(action) || checkedActions.has(action)
+	return actionIsPressed(action) || checkedActions.has(action)
 
 func actionIsPressed(action: String):
 	if (pressedActions.has(action)):
@@ -160,7 +169,7 @@ func handleFunc(function: String):
 		var funcName = trimWhitespace(parts[0])
 		var lines = parts[1].split(")", true, 1)
 		var args = lines[0].split(",", false)
-		var finalLines = trimWhitespace(lines[1]).trim_prefix("{").trim_suffix("}").c_escape()
+		var finalLines = trimWhitespace(lines[1]).trim_prefix("{").trim_suffix("}").replace("\"", "").c_escape()
 		var funcsToCall = finalLines.split("\\n", false)
 		userActions[funcName] = UserAction.new(funcName, args, funcsToCall)
 
