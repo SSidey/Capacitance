@@ -14,7 +14,7 @@ var handleBoundActions = true
 var pressedActions = {}
 var checkedActions = []
 var validInputs = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-
+var allActions = ["print", "help", "move", "use", "take", "bind", "cast"]
 signal use
 signal take
 signal terminalMessage(message)
@@ -167,11 +167,17 @@ func handleFunc(function: String):
 	var parts = text.split("(", true, 1)
 	if parts.size() == 2:
 		var funcName = trimWhitespace(parts[0])
+		if (!canAssignFunction(funcName)):
+			emit_signal("terminalMessage", "Could not assign to function \"" + funcName + "\"")
+			return
 		var lines = parts[1].split(")", true, 1)
 		var args = lines[0].split(",", false)
 		var finalLines = trimWhitespace(lines[1]).trim_prefix("{").trim_suffix("}").replace("\"", "").c_escape()
 		var funcsToCall = finalLines.split("\\n", false)
 		userActions[funcName] = UserAction.new(funcName, args, funcsToCall)
+
+func canAssignFunction(funcName):
+	return allActions.has(funcName) && funcName.length() > 0
 
 func trimWhitespace(string: String):
 	return removeWrappingCharacter(string, " ")
