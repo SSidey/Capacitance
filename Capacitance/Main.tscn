@@ -35,4 +35,5 @@ position = Vector2( 463.215, 318.685 )
 [connection signal="gui_input" from="TextureRect" to="." method="_on_TextureRect_gui_input"]
 [connection signal="take" from="Player" to="Item" method="_on_Player_take"]
 [connection signal="use" from="Player" to="Button" method="_on_Player_use"]
+[connection signal="focus_terminal" from="InputTerminal" to="." method="_on_InputTerminal_focus_terminal"]
 [connection signal="handle_input" from="InputTerminal" to="." method="_handle_input"]

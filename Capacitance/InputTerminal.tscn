@@ -23,4 +23,5 @@ margin_left = -100.0
 margin_top = -50.0
 text = "Enter"
 
+[connection signal="gui_input" from="TextField" to="." method="_on_TextField_gui_input"]
 [connection signal="pressed" from="EnterButton" to="." method="_on_EnterButton_pressed"]
